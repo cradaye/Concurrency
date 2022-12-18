@@ -1,6 +1,8 @@
 import UIKit
 
+// shared resource
 var balance = 1200
+
 
 func withdraw(value: Int, tag: String) {
     print("\(tag): checking if balance containing sufficent money")
@@ -16,6 +18,9 @@ func withdraw(value: Int, tag: String) {
     }
 }
 
+//Used to run method concurrently to produce race condition.
+//Where more than one thread tries to access the shared resource
+//here shared resource is balance
 let queue = DispatchQueue(label: "WithdrawalQueue", attributes: .concurrent)
 
 // Value 1 indicated maximum concurrent operations - at time how many thread sharing a resource
@@ -23,14 +28,14 @@ let semaphore = DispatchSemaphore(value: 1)
 
 queue.async {
     
-    //semaphore.wait() //No other thread using our global variable balance
-    withdraw(value: 1000, tag: "firstATM")
-    //semaphore.signal() // Now anyone can use global variable balance
+    semaphore.wait() //No other thread using our shared resource balance
+    withdraw(value: 1000, tag: "Net Banking")
+    semaphore.signal() // Now anyone can open to use shared resource balance
     
 }
 
 queue.async {
-    //semaphore.wait() //No other thread using our global variable balance
-    withdraw(value: 800, tag: "SecondATM")
-    //semaphore.signal() // Now anyone can use global variable balance
+    semaphore.wait() //No other thread using our shared resource balance
+    withdraw(value: 800, tag: "Atm Withdrawal")
+    semaphore.signal() // Now anyone can open to use shared resource balance
 }
