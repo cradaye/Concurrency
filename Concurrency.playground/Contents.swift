@@ -1,9 +1,10 @@
 import UIKit
+import Foundation
 
 // shared resource
 var balance = 1200
 
-
+// This function simulating account balance deduction
 func withdraw(value: Int, tag: String) {
     print("\(tag): checking if balance containing sufficent money")
     if balance > value {
@@ -18,6 +19,11 @@ func withdraw(value: Int, tag: String) {
     }
 }
 
+// Bank server function accepting closure
+func bankServer(amount: Int, transType: String ,doTransaction: (Int, String)-> Void) {
+    doTransaction(amount, transType)
+}
+
 //Used to run method concurrently to produce race condition.
 //Where more than one thread tries to access the shared resource
 //here shared resource is balance
@@ -29,13 +35,13 @@ let semaphore = DispatchSemaphore(value: 1)
 queue.async {
     
     semaphore.wait() //No other thread using our shared resource balance
-    withdraw(value: 1000, tag: "Net Banking")
+    bankServer(amount: 1000, transType: "Net Banking", doTransaction: withdraw)
     semaphore.signal() // Now anyone can open to use shared resource balance
     
 }
 
 queue.async {
     semaphore.wait() //No other thread using our shared resource balance
-    withdraw(value: 800, tag: "Atm Withdrawal")
+    bankServer(amount: 800, transType: "Atm Withdrawal", doTransaction: withdraw)
     semaphore.signal() // Now anyone can open to use shared resource balance
 }
